@@ -1,4 +1,4 @@
-## [REST API](http://localhost:8080/doc)
+﻿## [REST API](http://localhost:8080/doc)
 
 ## Концепция:
 
@@ -27,4 +27,10 @@
 - https://habr.com/ru/articles/259055/
 
 Список выполненных задач:
-...
+1. Разобраться со структурой проекта.
+
+2. Удалены социальные сети: vk, yandex.
+
+3. Сделан рефакторинг метода com.javarush.jira.bugtracking.attachment.FileUtil#upload
+
+4. 

@@ -7,14 +7,14 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 @UtilityClass
 public class FileUtil {
@@ -25,14 +25,17 @@ public class FileUtil {
             throw new IllegalRequestDataException("Select a file to upload.");
         }
 
-        File dir = new File(directoryPath);
-        if (dir.exists() || dir.mkdirs()) {
-            File file = new File(directoryPath + fileName);
-            try (OutputStream outStream = new FileOutputStream(file)) {
-                outStream.write(multipartFile.getBytes());
-            } catch (IOException ex) {
-                throw new IllegalRequestDataException("Failed to upload file" + multipartFile.getOriginalFilename());
+        Path dirPath = Paths.get(directoryPath);
+        Path filePath = dirPath.resolve(fileName);
+
+        try {
+            Files.createDirectories(dirPath);
+
+            try (InputStream inputStream = multipartFile.getInputStream()) {
+                Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
             }
+        } catch (IOException ex) {
+            throw new IllegalRequestDataException("Failed to upload file: " + multipartFile.getOriginalFilename());
         }
     }
 
@@ -40,10 +43,10 @@ public class FileUtil {
         Path path = Paths.get(fileLink);
         try {
             Resource resource = new UrlResource(path.toUri());
-            if (resource.exists() || resource.isReadable()) {
+            if (resource.exists() && resource.isReadable()) {
                 return resource;
             } else {
-                throw new IllegalRequestDataException("Failed to download file " + resource.getFilename());
+                throw new NotFoundException("File not found or not readable: " + path.getFileName());
             }
         } catch (MalformedURLException ex) {
             throw new NotFoundException("File" + fileLink + " not found");
@@ -53,9 +56,24 @@ public class FileUtil {
     public static void delete(String fileLink) {
         Path path = Paths.get(fileLink);
         try {
-            Files.delete(path);
+            if (Files.exists(path)) {
+                Files.delete(path);
+
+                deleteEmptyParentDirectories(path.getParent());
+            }
         } catch (IOException ex) {
-            throw new IllegalRequestDataException("File" + fileLink + " deletion failed.");
+            throw new IllegalRequestDataException("File deletion failed: " + fileLink);
+        }
+    }
+
+    private static void deleteEmptyParentDirectories(Path directory) throws IOException {
+        if (directory != null && Files.exists(directory)) {
+            try (var stream = Files.list(directory)) {
+                if (stream.count() == 0) {
+                    Files.delete(directory);
+                    deleteEmptyParentDirectories(directory.getParent());
+                }
+            }
         }
     }
 
