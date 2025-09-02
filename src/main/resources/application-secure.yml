@@ -1,0 +1,22 @@
+spring:
+    datasource:
+        username: ${DB_USERNAME}
+        password: ${DB_PASSWORD}
+
+    mail:
+        username: ${MAIL_USERNAME}
+        password: ${MAIL_PASSWORD}
+
+    security:
+        oauth2:
+            client:
+                registration:
+                    github:
+                        client-id: ${OAUTH_GITHUB_CLIENT_ID}
+                        client-secret: ${OAUTH_GITHUB_CLIENT_SECRET}
+                    google:
+                        client-id: ${OAUTH_GOOGLE_CLIENT_ID}
+                        client-secret: ${OAUTH_GOOGLE_CLIENT_SECRET}
+                    gitlab:
+                        client-id: ${OAUTH_GITLAB_CLIENT_ID}
+                        client-secret: ${OAUTH_GITLAB_CLIENT_SECRET}

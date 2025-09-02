@@ -1,11 +1,17 @@
-FROM maven:3.8.4-openjdk-17 AS build
-WORKDIR /build
-COPY . /build/.
-RUN mvn clean install -P prod
+FROM maven:3.9.6-eclipse-temurin-17 AS build
+WORKDIR /app
 
-FROM openjdk:17-alpine
-ARG JAR_FILE=target/*.jar
-COPY --from=build /build/${JAR_FILE} //app.jar
-USER root
-EXPOSE 8080:8080
-ENTRYPOINT ["java", "-jar", "//app.jar"]
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+COPY src ./src
+RUN mvn clean package -DskipTests
+
+FROM eclipse-temurin:17-jdk-jammy
+WORKDIR /app
+
+COPY --from=build /app/target/*.jar app.jar
+
+ENTRYPOINT ["java","-XX:+UseContainerSupport","-XX:MaxRAMPercentage=75.0","-jar","/app/app.jar"]
+
+EXPOSE 8080
