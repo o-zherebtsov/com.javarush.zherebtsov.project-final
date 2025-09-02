@@ -33,4 +33,6 @@
 
 3. Сделан рефакторинг метода com.javarush.jira.bugtracking.attachment.FileUtil#upload
 
-4. 
+4. Вынесена чувствительная информацию в отдельный проперти файл
+
+5. Создан Dockerfile
