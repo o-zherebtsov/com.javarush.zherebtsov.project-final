@@ -11,6 +11,8 @@ FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
 
 COPY --from=build /app/target/*.jar app.jar
+COPY ./config/nginx.conf ./config/nginx.conf
+COPY ./resources ./resources
 
 ENTRYPOINT ["java","-XX:+UseContainerSupport","-XX:MaxRAMPercentage=75.0","-jar","/app/app.jar"]
 
